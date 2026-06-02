@@ -80,3 +80,23 @@ extension Resource {
         failure != nil
     }
 }
+
+extension Resource where Failure: Equatable & Error & Sendable {
+    public func beginLoading() -> Resource<Value, Failure> {
+        if let value = value {
+            return .refreshing(value)
+        }
+        return .loading
+    }
+
+    public func succeed(_ value: Value) -> Resource<Value, Failure> {
+        .available(value)
+    }
+
+    public func fail(_ failure: Failure) -> Resource<Value, Failure> {
+        if let value = value {
+            return .stale(value, failure)
+        }
+        return .failed(failure)
+    }
+}
